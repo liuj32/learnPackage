@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+
+
+        class Promises {
+            constructor(executor) {
+                this.state = 'pending'
+                this.value = ''
+                this.reason = ''
+                this.onResolveCallbacks = []
+                this.onRejectCallbacks = []
+                let resovle =  (val) => {
+                    if (this.state == 'pending'){
+                        this.state = 'fulfilled'
+                        this.value = val
+                        this.onResolveCallbacks.forEach(item => {
+                            item(this.value)
+                        })
+                        console.log(val)
+                    }
+                }
+                let reject = (val) => {
+                    if (this.state == 'pending'){
+                        this.onRejectCallbacks.forEach(item => {
+                            item(this.reason)
+                        })                        
+                        this.state = 'reject'
+                        this.reason = val
+                        console.log(val)
+                    }
+                }
+                try{
+                    executor(resovle, reject)
+                }catch(e){
+                    this.reason = e
+                    reject(e)
+                }
+                
+            }
+
+            then(onFulfilled, onReject){
+                if(this.state == 'pending'){
+                    this.onResolveCallbacks.push(onFulfilled)
+                    this.onRejectCallbacks.push(onReject)
+                }
+                if(this.state == 'fulfilled'){
+                    onFulfilled(this.value)
+                }
+                if(this.state == 'reject'){
+                    onReject(this.reason)
+                }                
+                return this
+            }
+        }
+
+        let  p = new Promises(function (resovel, reject) {
+            setTimeout(function(){
+                resovel(1234)
+            },0)
+            
+        })
+        p.then(function (res) {  
+            console.log(res)
+        },function (reason) {
+            console.log(reason)
+          })
+        .then(function (response) { 
+             console.log(response)
+         },function (reject) {
+             console.log(reject)
+           })
+    </script>
+</body>
+
+</html>

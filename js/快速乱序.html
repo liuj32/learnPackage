@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .box{
+            width: 500px;
+            height: 500px;
+            border: 1px solid black;
+            /* user-select: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+         asdfasdfasfasdf
+    </div>
+    <script>
+        window.addEventListener('copy',function(){
+
+
+  var id;
+  var text=window.getSelection()
+  if (clipboardData.setData("text",text)){
+    alert("复制成功!")
+  }else{
+    alert("复制失败!")
+  }
+
+        },true)
+        // var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        // arr.sort(function () {
+        //     console.log(arr)
+        //     let a = Math.random()
+        //     console.log(a)
+        //     return a - 0.5
+        // })
+        // console.log(arr);
+    </script>
+</body>
+
+</html>

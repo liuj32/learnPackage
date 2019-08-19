@@ -1,0 +1,19 @@
+{
+  "name": "webpack-demo16",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "webpack",
+    "test": "jest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "mocha": "^6.2.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-jest": "^24.9.0",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^24.9.0",
+    "regenerator-runtime": "^0.13.3"
+  }
+}

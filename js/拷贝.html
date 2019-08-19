@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+
+        function shallowClone(sourceObj) {
+            // 先判断传入的是否为对象类型
+            if (!sourceObj || typeof sourceObj !== 'object') {
+                console.log('您传入的不是对象!!')
+            }
+            // 判断传入的 Obj是类型,然后给予对应的赋值
+            var targetObj = sourceObj.constructor === Array ? [] : {};
+
+            // 遍历所有 key
+            for (var keys in sourceObj) {
+                // 判断所有属于自身原型链上的 key,而非继承(上游 )那些
+                if (sourceObj.hasOwnProperty(keys)) {
+                    // 一一复制过来
+                    targetObj[keys] = sourceObj[keys];
+                }
+            }
+            return targetObj;
+        }
+
+        var o1 = {age: '21',name: 'liujie'}
+        var o2 = shallowClone(o1)
+        o1.age = '22'
+        console.log(o1)
+        console.log(o2)
+
+        let arr= [1,2,3]
+        console.log(Math.max.apply(null,arr))
+    </script>
+</body>
+
+</html>

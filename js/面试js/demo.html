@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<script>
+
+function selfMap(fn, context) {
+    let arr = Array.prototype.slice.call(this)
+    let mappedArr = Array()
+    for (let i = 0; i < arr.length; i++) {
+        mappedArr[i] = fn.call(context, arr[i], i, this)
+    }
+    return mappedArr
+}
+
+function selfMap2(fn, context) {
+    let arr = Array.prototype.slice.call(this)
+    return arr.reduce((pre, cur, index) => {
+        return [...pre, fn.call(context, cur, index, this)]
+    }, [])
+}
+
+function selfFilter(fn, context) {
+    let arr = Array.prototype.slice.call(this)
+    let filterArr= Array()
+    for(let i=0;i<arr.length;i++){
+        if(fn.call(context,arr[i],i,this)){
+            filterArr.push(arr[i])
+        }
+    }
+    return filterArr
+}
+
+function selfFilter2(fn, context) {
+    let arr = Array.prototype.slice.call(this)
+    return arr.reduce((pre, cur, index) => fn.call(context,cur,index,this) ? [...pre, cur] : [...pre],[])
+}
+
+function selfSome(fn, context) {
+    let arr = Array.prototype.slice.call(this)
+    for(let i=0;i<arr.length;i++){
+       let res = fn.call(context,arr[i],i,this) 
+       if(res) return true
+    }
+    return false
+}
+
+//arr.reduce((pre,cur,index) => fn(), init)
+function selfRedcue(fn, initialValue) {
+    let arr = Array.prototype.slice.call(this)
+    let initVal 
+    let startIndex 
+    if(initialValue){
+        initVal  = initialValue
+    }else{
+        initialValue = arr[0];
+        startIndex = 0
+    }
+    let res = initVal
+    for(let i=++startIndex || 0;i<arr.length;i++){
+        res = fn.call(null,res,arr[i],i,this)
+        
+    }
+    return res
+}
+
+const  speed  =function (fn, num) {
+    console.time('time')
+    let value = fn(num)
+    console.timeEnd('time')
+    console.log(`返回值:${value}`)
+  }
+
+let fibonacci = function (n) {
+    if(n<1) throw new Error('参数错误')
+
+    if(n == 1 || n==2) return 1
+    return fibonacci(n-1)+fibonacci(n-2)
+  }
+  
+function memory(fn) {
+    let obj  = {}
+
+    return function (n) { 
+        if(obj[n] == undefined) obj[n] = fn(n)
+        return obj[n]
+     }
+
+  }
+
+// speed(fibonacci,35)
+
+//   fibonacci = memory(fibonacci)
+
+// speed(fibonacci,35)
+
+
+
+const isComplexDataType = obj =>  (typeof obj == 'object' || typeof obj == 'function') && obj !=undefined
+function selfBind(bindTarget, ...args1){
+    if(typeof this !='function') throw new Error('绑定的必须为函数')
+    let func = this
+    let bundFunc = function(...arg2){
+        let args = [...args1, ...arg2]
+
+        if(new.target){
+            let res = func.apply(this, args)
+            if(isComplexDataType(res)) return res 
+            return this
+        } else {
+            func.apply(bindTarget, args)
+        }
+    }
+
+    bundFunc.prototype && (bundFunc.prototype = Object.create(func.prototype))
+    return bundFunc
+}
+
+function selfCall(context, ...arg1){
+    let fn = this
+    if(typeof this != 'function') throw new Error('不是函数')
+    context || (context = window)
+    let caller = Symbol('caller')
+
+    context[caller] = fn 
+    let result =  context[caller](...arg1)
+    delete context[caller]
+    return 
+}
+
+Function.prototype.selfCall = selfCall
+
+/**
+ * co模块
+ */
+const data = "{a:1,b:2}"
+const data2 = "{c:3,d:4}"
+const data3 = "{e:5,f:6}"
+
+const api = function (data) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve(data)
+        }, 1000)
+    })
+
+}
+
+
+function* func() {
+  let result1 = yield api(data);
+  console.log(result1)
+  let result2 = yield api(data2);
+  console.log(result2)
+  let result3 = yield api(data3);
+  console.log(result1)
+
+  console.log(result1, result2, result3)
+}
+
+function makePromisify(source){
+    if (source.then && typeof source.then === "function") return source
+    return Promise.resolve(source)
+}
+
+function run(generatorFn){
+    let it = generatorFn()
+    let result = it.next()
+    
+    return new Promise((resolve, reject) =>{
+        let next = function(result){
+            if(result.done){
+                console.log(result.value)
+                resolve(result.value)
+            }
+
+            result.value = makePromisify(result.value)
+            result.value.then(res => {
+                let result = it.next(res)
+                next(result)
+            }).catch(err => {
+                reject(err)
+            })
+
+            
+        }
+
+        next(result)
+    })
+}
+
+
+
+//run(func)
+
+/**
+ * bounce
+ * 防抖  连续操作只执行一次
+ */ 
+
+const debounce = function(fn, time, option = {
+    leading: true,
+    context: null,
+
+}){
+    let timer 
+    let _debounce = function(...args){
+        if(timer){
+            clearTimeout(timer)
+        }
+        if(option.leading&& !timer){
+            fn.call(option.context, args)
+        }else {
+            timer = setTimeout(() => {
+                func.apply(option.context, args)
+                timer = null
+            }, time)
+        }
+    }
+
+    return _debounce
+
+}
+
+
+/**
+ * throttle
+ * 节流  连续操作时间间隔执行
+ */ 
+
+
+function throttle (func, time = 2000, option ={
+    context: null,
+    leading: true
+}){
+    let start = new Date().getTime() , now
+    let _throttle = function(...args){
+        if(timer){
+            clearTimeout(timer)
+        }
+        now = new Date().getTime()
+        if(now - start >= time){
+            func.apply(option.context, args)
+            start = now
+        }else{
+            timer = setTimeout(function(){
+                func.apply(option.context, args)
+                start = now
+            }, timer)
+        }
+    }
+}
+
+
+/**
+ * 懒加载
+ * lazyLoad
+ * 
+ */
+ let lazyImgList = [...document.querySelectorAll('.lazy')]
+ let num = lazyImgList.length
+
+lazyLoad1 = (function(){
+    let count = 0
+    return function() {
+    let deleteList = []
+
+    lazyImgList.forEach((item,index) => {
+        if(item.getBoundingClientRect().top< window.innerHeight){
+            item.src = img.dataset.url 
+            count++
+            deleteList.push(index)
+        }
+    })
+    if(num = count){
+        document.removeEventListener('scroll', lazyLoad1)
+    }
+    lazyImgList = lazyImgList.filter(_, index => !deleteList.include(index))
+   
+ }
+
+})()
+
+ document.addEventListener('scroll', lazyLoad1)
+
+function selfApply(context, ...rest){
+    let fn = this
+    let caller = Symbol('callee')
+    context[caller] = fn
+    context[caller](...rest)
+    delete context[caller]
+}
+
+
+function selfNew(fn,...rest){
+    let instance = Object.create(fn.prototype)
+    let res = fn.apply(instance, rest)
+    if(isComplexDataType(res)){
+        console.log(11)
+        return res
+    } 
+    return instance
+}
+
+// console.log(selfNew(A))
+
+
+// function A(){
+//     this.a = 'aa'
+// }
+
+// console.log(new A())
+
+
+function selfAssign(target, ...source){
+    if(target == null) throw new TypeError('不能为空对象')
+
+    return source.reduce((acc, cur) => {
+        isComplexDataType(acc) || (acc = new Object(acc))
+        if(cur == null) return acc ;
+        [...Object.keys(cur), ...Object.getOwnPropertySymbols(cur)].forEach(key =>{
+            acc[key] = cur[key]
+        })
+        return acc
+    }, target)
+}
+
+Object.selfApply || Object.defineProperty(Object, 'selfAssign' ,{
+    value: selfAssign,
+    writable: true,
+    enumerable: false,
+    configurable: true
+})
+
+function selfInstance(left ,right){
+    let proto = Object.getPrototypeOf(left)
+
+    while(true){
+        if(proto == null) return false 
+        if(proto == right.prototype) return true 
+        proto = Object.getPrototypeOf(proto)
+    }
+}
+
+
+/***
+ * 是有变量的实现
+ */ 
+
+const proxy1 = function(obj){
+    return new Proxy(obj, {
+        get(target, key){
+            if(key.startsWith("_")){
+                throw new Error('不能访问私有变量')
+            }
+            return  Reflect.get(target, key)
+        },
+
+        ownKeys(target, key, value){
+           return Reflect.ownKeys(target).filter(key => !key.startsWith("_"))
+        }
+    })
+}
+
+
+
+const Person2 = (function(){
+    const  _name = Symbol("name")
+    class Person {
+   
+        constructor(name){
+            this[_name] = name
+        }
+        getName(){
+            return this[_name]
+        }
+    }
+    return Person
+})()
+
+
+
+const Person3 = (function(){
+    const  wm = new WeakMap()
+    class Person {
+   
+        constructor(name){
+           wm.set(this,{name})
+        }
+        getName(){
+            return wm.get(this).name
+        }
+    }
+    return Person
+})()
+
+
+
+
+
+
+
+
+/**
+ * 乱序 originSort
+ */
+
+ function originSort(arr) {
+    return arr.sort(() => Math.random() - 0.5)
+    
+}
+
+
+
+
+function shuffle(arr) {
+    for(let i=0;i<arr.length;i++){
+        let index = i+ Math.ceil(Math.random()* (arr.length -i));
+        [arr[i], arr[index]] = [arr[index], arr[i]]
+    }
+    return arr
+}
+
+function shuffle2(arr) {
+    let _arr = []
+    while(arr.length){
+        let index = Math.floor(Math.random()*(arr.length))
+        _arr.push(arr.splice(index,1)[0])
+    }
+    return _arr
+}
+
+//console.log(shuffle2([1,2,3]))
+
+/***
+ * 单例模式
+ */ 
+function proxy(fn){
+   let instance = null
+
+   let handle ={
+       construct(target, args){
+         if(!instance) {
+             instance = Reflect.construct(fn,args)
+         }
+         return instance
+       }
+   }
+
+   return new Proxy(fn, handle)
+}
+
+function Person(name, age) {
+    this.name = name
+    this.age = age
+}
+const SingletonPerson = proxy(Person)
+
+
+let person1 = new SingletonPerson('zhl', 22)
+
+let person2 = new SingletonPerson('cyw', 22)
+
+//console.log(person1 === person2) // true
+
+
+
+function binaryFind(arr, target, low=0,high=arr.length-1){
+    const n = Math.floor((low+high) /2);
+    const cur = arr[n];
+    console.log(cur)
+    if(cur === target) {
+        return `找到了${target},在第${n+1}个`;
+    } else if(cur > target) {
+        return binaryFind(arr,target,low, n-1);
+    } else if (cur < target) {
+        return binaryFind(arr,target,n+1,high);
+    }
+    return -1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+</script>
+</body>
+</html>

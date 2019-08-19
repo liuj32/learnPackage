@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`enum 1`] = `"Unknown enum 'DELETE_TODO'"`;
+
+exports[`enum 2`] = `"Enum is readonly"`;
