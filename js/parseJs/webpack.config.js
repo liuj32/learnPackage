@@ -1,6 +1,6 @@
 module.exports = {
   mode: 'development',
-  entry: './src/index.js',
+  entry: './src/proxyTrackIndex.js',
   output: {
     filename: './bundle.js'
   },

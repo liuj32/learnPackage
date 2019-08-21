@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+</head>
+<body>
+	<script>
+
+
+/***
+ *   实现一个 new操作符
+ */
+
+ isComplexDataType = (value) => (typeof value == 'object' ) && value != undefined
+ function selfNew(func,...args){
+		 let instance  = Object.create(func.prototype)
+		 let res = func.apply(instance, args)
+		 if(isComplexDataType(res)) return res 
+		 return instance
+ }
+
+ function selfNew2(){
+	 let instance  = new Object()
+	 let cons = [].shift.apply(arguments)
+	 Object.setPrototypeOf(instance, cons.prototype)
+	 let res = cons.apply(instance, arguments)
+	 if(typeof res == 'object') return res
+	 return instance
+
+
+ }
+
+/**
+ * 监听页面关闭
+ * beforeunload unload
+ */ 
+
+
+// window.addEventListener('beforeunload',function(){
+// 	event.preventDefault();
+// 	event.returnValue = ""
+// })
+
+
+
+// window.addEventListener('unload',function(){
+// 	event.preventDefault();
+// 	event.returnValue = ""
+// })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	</script>
+</body>
+</html>
