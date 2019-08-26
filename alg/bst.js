@@ -15,7 +15,7 @@ function insert(data) {
         let parent
         while (true) {
             parent = current
-            if (data < current.show()) {z
+            if (data < current.show()) {
                 current = current.left
                 if (current == null) {
                     parent.left = node
@@ -43,11 +43,11 @@ function Bst() {
 function zOrder(node) {
     if (node !== null) {
         //如果不是null，就一直查找左变，因此递归
-        inOrder(node.left);
+        zOrder(node.left);
         //递归结束，打印当前值
         console.log(node.show());
         //上一次递归已经把左边搞完了，右边
-        inOrder(node.right);
+        zOrder(node.right);
     }
 }
 
