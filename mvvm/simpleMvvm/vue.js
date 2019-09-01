@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let opt = { el: '#app', data: { name: '检索中...', age: 30 } }
     let vm = new Vue(opt)
     setTimeout(() => {
-        opt.data.name = '王永峰'
+        opt.data.name = 'lj'
     }, 2000);
 }, false)
 
